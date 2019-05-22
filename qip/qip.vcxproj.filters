@@ -35,5 +35,8 @@
     <ClInclude Include="..\lib\qp\qp.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
+    <ClInclude Include="..\lib\pykdb\ktopy.hpp">
+      <Filter>Headerdateien</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

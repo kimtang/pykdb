@@ -6,11 +6,26 @@ os.getcwd()
 
 copyfile('..\\x64\\Release\\qip.dll','qip.pyd')
 
+import numpy, pandas
 import qip
 
-i = qip.khp('',8888)
+hdl = qip.open_connection(8888,'')
 
-k = qip.k2(i,'10 2 11 1 1 1 1f ')
+e = qip.execute(hdl,'1+1')
+
+k = qip.execute(hdl,'1 1')
+
+k
+
+k = qip.execute(hdl,'([]a:1 1)')
+
+k = qip.execute(hdl,'`a`b! (1 2;`a`b! 1 2)')
+
+k
+
+k = qip.execute(hdl,'1+abc')
+
+
 
 # print qip.n(k)
 
