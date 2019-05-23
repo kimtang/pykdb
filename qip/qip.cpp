@@ -4,23 +4,6 @@
 
 using namespace boost::python;
 
-PyObject* createExceptionClass(const char* name, PyObject* baseTypeObj = PyExc_Exception)
-{
-	using std::string;
-	namespace bp = boost::python;
-
-	string scopeName = bp::extract<string>(bp::scope().attr("__name__"));
-	string qualifiedName0 = scopeName + "." + name;
-	char* qualifiedName1 = const_cast<char*>(qualifiedName0.c_str());
-
-	PyObject* typeObj = PyErr_NewException(qualifiedName1, baseTypeObj, 0);
-	if (!typeObj) bp::throw_error_already_set();
-	bp::scope().attr(name) = bp::handle<>(bp::borrowed(typeObj));
-	return typeObj;
-}
-
-PyObject* myExceptionTypeObj = 0;
-
 kx::K execute0(kx::I i, kx::SS s){ return kx::k(i, s, (kx::K)0); }
 kx::K execute1(kx::I i, kx::SS s,python::object k1){ return kx::k(i, s, pytok::python_to_k_map_func(k1), (kx::K)0); }
 kx::K execute2(kx::I i, kx::SS s,python::object k1,python::object k2){ return kx::k(i, s, pytok::python_to_k_map_func(k1), pytok::python_to_k_map_func(k2), (kx::K)0); }
@@ -70,11 +53,7 @@ BOOST_PYTHON_MODULE(qip)
 {
 	ktopy::k_to_p_map_init();
 	pytok::p_to_k_map_init();
-
-
-
 	def("execute", execute, execute_overloads());
-	myExceptionTypeObj = createExceptionClass("qip error");
 	def("open_connection", open_connection, open_connection_overloads());
 	def("close", kx::kclose);
 

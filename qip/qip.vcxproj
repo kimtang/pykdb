@@ -172,7 +172,7 @@
     <ClInclude Include="..\lib\kdb\kundef.hpp" />
     <ClInclude Include="..\lib\kdb\kx.hpp" />
     <ClInclude Include="..\lib\pykdb\ktopy.hpp" />
-    <ClInclude Include="..\lib\qp\qp.hpp" />
+    <ClInclude Include="..\lib\pykdb\pytok.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

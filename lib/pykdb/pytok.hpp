@@ -3,6 +3,8 @@
 # define PYKTO_HPP_KKT_22_05_2019
 
 # include <kdb/kx.hpp>
+# include <boost/uuid/uuid.hpp>
+# include <boost/uuid/string_generator.hpp>
 # include <boost/python.hpp>
 # include <cstdint>
 # include <map>
@@ -258,6 +260,17 @@ namespace pytok {
 		return (i->second)(o,g,l);
 	}
 
+	kx::K uuid_to_kdb(python::object o,python::object g,python::object l){
+		std::string uuid0 = python::extract<std::string>(o.attr("__str__")());
+		boost::uuids::string_generator gen;
+		boost::uuids::uuid u = gen(uuid0);
+		kx::K kuid = kx::ka(-2);
+		kx::G* guid = ((kx::U*) kuid->G0)->g;
+		std::copy(u.begin(),u.end(),guid);
+
+		return kuid;
+	}	
+
 
 	kx::K dict_to_kdb(python::object o,python::object g,python::object l){
 		python::dict d = python::extract<python::dict>(o);
@@ -300,6 +313,8 @@ namespace pytok {
 	  python_to_k_funcs["float"] = &float_to_kdb;
 	  python_to_k_funcs["long"] = &long_to_kdb;
 	  python_to_k_funcs["str"] = &str_to_kdb;
+
+	  python_to_k_funcs["UUID"] = &uuid_to_kdb;
 
 	  python_to_k_funcs["timedelta64"] = &numpy_to_kdb;
 	  python_to_k_funcs["datetime64"] = &numpy_to_kdb;

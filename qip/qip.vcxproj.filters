@@ -32,10 +32,10 @@
     <ClInclude Include="..\lib\kdb\kx.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="..\lib\qp\qp.hpp">
+    <ClInclude Include="..\lib\pykdb\ktopy.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="..\lib\pykdb\ktopy.hpp">
+    <ClInclude Include="..\lib\pykdb\pytok.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

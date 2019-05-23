@@ -4,6 +4,8 @@
 
 # include <kdb/kx.hpp>
 # include <boost/python.hpp>
+# include <boost/uuid/uuid.hpp>
+# include <boost/uuid/uuid_io.hpp>
 # include <cstdint>
 # include <map>
 # include <string>
@@ -123,13 +125,21 @@ namespace ktopy {
 	python::object byte_to_python(kx::K k,python::object g){ return python::object(k->g);};
 
 	python::object guid_to_python(kx::K k,python::object g){
-	//  kx::U* uuid = (kx::U*) k->G0;
-	//  char u[37] = {};
-	//  sprintf(u,"%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-	//    uuid[0], uuid[1], uuid[2], uuid[3], uuid[4], uuid[5], uuid[6], uuid[7],
-	//    uuid[8], uuid[9], uuid[10], uuid[11], uuid[12], uuid[13], uuid[14], uuid[15]
-	//  );
-	  return python::str("nyi");
+		kx::G* guid = ((kx::U*) k->G0)->g;	  
+		
+		boost::uuids::uuid u;
+		std::copy(guid, guid + 16, u.begin());
+		// kx::U* uuid0 = (kx::U*) k->G0;
+		// kx::G* guid = guid0->g; 
+		// char u[37] = {};
+		// sprintf_s(u,"%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+		// guid[0], guid[1], guid[2], guid[3], guid[4], guid[5], guid[6], guid[7],
+		// guid[8], guid[9], guid[10], guid[11], guid[12], guid[13], guid[14], guid[15]
+		// );
+		std::string uu = boost::uuids::to_string(u);
+		python::object uuid = python::eval("uuid.UUID",g)
+					  ,sguid = python::str(uu);
+		return uuid(sguid);
 	  };
 
 	python::object boolean_to_python(kx::K k,python::object g){
@@ -152,7 +162,24 @@ namespace ktopy {
 		return np;
 	};
 	// TODO: Add implementation for guid
-	python::object lguid_to_python(kx::K k,python::object g){return python::object("nyi");};
+	python::object lguid_to_python(kx::K k,python::object g){
+		python::list lst = python::list();
+		kx::U* luuid = (kx::U*) k->G0;
+		for(std::size_t i=0,end = k->n;i<end;++i,++luuid)
+		{
+	  		char u[37] = {};
+	  		kx::G* guid = luuid->g;
+	  		sprintf_s(u,"%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+	    		guid[0], guid[1], guid[2], guid[3], guid[4], guid[5], guid[6], guid[7],
+	    		guid[8], guid[9], guid[10], guid[11], guid[12], guid[13], guid[14], guid[15]
+	  		);
+	  		python::object uuid = python::eval("uuid.UUID",g)
+					  	 ,sguid = python::str(u);
+			lst.append(uuid(sguid) );
+		}
+
+		return lst;
+	};
 
 
 	python::object lbyte_to_python(kx::K k_,python::object g){
