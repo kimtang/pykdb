@@ -4,6 +4,13 @@
 
 using namespace boost::python;
 
+
+bool isNone(python::object const& o) {
+	python::object oo = o.attr("__class__").attr("__name__");
+	std::string str = python::extract<std::string>(oo);
+	return str.compare("NoneType") == 0;
+}
+
 kx::K execute0(kx::I i, kx::SS s){ return kx::k(i, s, (kx::K)0); }
 kx::K execute1(kx::I i, kx::SS s,python::object k1){ return kx::k(i, s, pytok::python_to_k_map_func(k1), (kx::K)0); }
 kx::K execute2(kx::I i, kx::SS s,python::object k1,python::object k2){ return kx::k(i, s, pytok::python_to_k_map_func(k1), pytok::python_to_k_map_func(k2), (kx::K)0); }
@@ -12,11 +19,11 @@ kx::K execute4(kx::I i, kx::SS s,python::object k1,python::object k2,python::obj
 kx::K execute5(kx::I i, kx::SS s,python::object k1,python::object k2,python::object k3,python::object k4,python::object k5){ return kx::k(i, s, pytok::python_to_k_map_func(k1), pytok::python_to_k_map_func(k2), pytok::python_to_k_map_func(k3), pytok::python_to_k_map_func(k4),pytok::python_to_k_map_func(k5), (kx::K)0); }
 
 kx::K execute_(kx::I i, kx::SS s, python::object k1, python::object k2, python::object k3, python::object k4, python::object k5){
-	if (k1 == boost::python::api::object() ) return execute0(i,s);
-	if (k2 == boost::python::api::object() ) return execute1(i,s,k1);
-	if (k3 == boost::python::api::object() ) return execute2(i,s,k1,k2);
-	if (k4 == boost::python::api::object() ) return execute3(i,s,k1,k2,k3);
-	if (k5 == boost::python::api::object() ) return execute4(i,s,k1,k2,k3,k4);
+	if ( isNone(k1) ) return execute0(i,s);
+	if ( isNone(k2) ) return execute1(i,s,k1);
+	if ( isNone(k3) ) return execute2(i,s,k1,k2);
+	if ( isNone(k4) ) return execute3(i,s,k1,k2,k3);
+	if ( isNone(k5) ) return execute4(i,s,k1,k2,k3,k4);
 	return execute5(i,s,k1,k2,k3,k4,k5);
 }
 
@@ -37,6 +44,17 @@ python::object execute(kx::I i, kx::SS s, python::object k1 = python::object(), 
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(execute_overloads, execute, 2, 7)
 
+bool kim(kx::I i, python::object k1 = python::object(), python::object k2 = python::object(), python::object k3 = python::object(), python::object k4 = python::object(), python::object k5 = python::object())
+{
+	if (i == 1) return isNone(k1);
+	if (i == 2) return isNone(k2);
+	if (i == 3) return isNone(k3);
+	if (i == 4) return isNone(k4);
+	if (i == 5) return isNone(k5);
+	return isNone(k5);
+}
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(kim_overloads, kim, 1, 6)
 
 kx::I open_connection(kx::I p, const kx::SS h = 0, const kx::SS u = 0, kx::I n = 0) {
 	std::string host("");
@@ -53,6 +71,7 @@ BOOST_PYTHON_MODULE(qip)
 {
 	ktopy::k_to_p_map_init();
 	pytok::p_to_k_map_init();
+	def("kim", kim, kim_overloads());
 	def("execute", execute, execute_overloads());
 	def("open_connection", open_connection, open_connection_overloads());
 	def("close", kx::kclose);

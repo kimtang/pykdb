@@ -11,41 +11,50 @@ import numpy, pandas,uuid
 import qip
 
 hdl = qip.open_connection(8888)
-guid = qip.execute(hdl,'0N!first 1?0ng')
 
-guid
+qip.execute(hdl,'{x}',ndata)
 
-lguid = qip.execute(hdl,'0N!3?0ng')
+ atoms = qip.execute(hdl,'atoms')
 
-lguid
+t = atoms[['name','data']]
 
-abc = qip.execute(hdl,'{0N!x}',guid)
+t['from_kdb'] = [ qip.execute(hdl,'{x}',row['data']) for _,row in t.iterrows() ]
 
-abc
+t['isSame'] = t['data'] == t['from_kdb']
 
-atoms = qip.execute(hdl,'atoms')
+print(
+    "Number of error: {}".format(len(t[~t['isSame']]))
+    )
 
-atoms
+t = atoms[['name','ldata']]
 
-guid
-larray = qip.execute(hdl,'{0N!x}',guid)
 
-type(larray)
+for _ , row in t.iterrows() :
+    print(qip.execute(hdl,'{x}',row['ldata']))
 
-qip.execute(hdl,'{1=x}',tmp)
 
-qip.execute(hdl,'{1=x}',tmp)
+ldata = row['ldata']
 
-k = qip.execute(hdl,'1 1')
+ldata.item()
 
-k
 
-k = qip.execute(hdl,'([]a:1 1)')
 
-k = qip.execute(hdl,'`a`b! (1 2;`a`b! 1 2)')
+data = t['ldata'].iloc[4]
 
-k
+data.__class__.__name__
 
-# k = qip.execute(hdl,'1+abc')
+data.dtype.name
 
-# qip.execute(hdl,"{0N!x}",1)
+data.size
+
+data.item(2)
+
+t['ldata'].iloc[0]
+
+qip.execute(hdl,'{x}',t['ldata'].iloc[4])
+
+
+
+ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
+
+t['isSame'] = t['data'] == t['from_kdb']

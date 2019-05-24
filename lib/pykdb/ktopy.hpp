@@ -129,13 +129,6 @@ namespace ktopy {
 		
 		boost::uuids::uuid u;
 		std::copy(guid, guid + 16, u.begin());
-		// kx::U* uuid0 = (kx::U*) k->G0;
-		// kx::G* guid = guid0->g; 
-		// char u[37] = {};
-		// sprintf_s(u,"%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-		// guid[0], guid[1], guid[2], guid[3], guid[4], guid[5], guid[6], guid[7],
-		// guid[8], guid[9], guid[10], guid[11], guid[12], guid[13], guid[14], guid[15]
-		// );
 		std::string uu = boost::uuids::to_string(u);
 		python::object uuid = python::eval("uuid.UUID",g)
 					  ,sguid = python::str(uu);

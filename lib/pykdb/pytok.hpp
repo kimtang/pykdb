@@ -23,61 +23,60 @@ namespace pytok {
 
 	std::string python_name(python::object const&o){
 		python::object oo = o.attr("__class__").attr("__name__");
-		std::string str = python::extract<std::string>(oo);
+		// std::string str = python::extract<std::string>(oo);
 		return python::extract<std::string>(oo);
 	}
 
 	kx::K python_to_k_map_func(python::object ,python::object ,python::object );
 
 	kx::K timedelta64_ms_to_kdb(python::object o,python::object g,python::object l){
-		python::object lng = python::eval("int",g,l);
+		python::object lng = python::eval("numpy.int",g,l);
 		python::object o_ = lng(o.attr("astype")(lng));
 		return kx::kt(python::extract<kx::I>(o_));
 	}
 
 	kx::K timedelta64_s_to_kdb(python::object o,python::object g,python::object l){
-		python::object lng = python::eval("int",g,l);
+		python::object lng = python::eval("numpy.int",g,l);
 		python::object o_ = lng(o.attr("astype")(lng));
 		return kx::ktj(-18,python::extract<kx::I>(o_));
 	}
 
 
 	kx::K timedelta64_m_to_kdb(python::object o,python::object g,python::object l){
-		python::object lng = python::eval("int",g,l);
+		python::object lng = python::eval("numpy.int",g,l);
 		python::object o_ = lng(o.attr("astype")(lng));
 		return kx::ktj(-17,python::extract<kx::I>(o_));
 	}
 
 	kx::K timedelta64_ns_to_kdb(python::object o,python::object g,python::object l){
-		python::object lng = python::eval("long",g,l);
-		python::object o_ = lng(o.attr("astype")(lng));
+		python::object lng = python::eval("int",g,l);
+		python::object o_ = lng(o);
 		return kx::ktj(-16,python::extract<kx::J>(o_));
 	}
 
 	kx::K datetime64_us_to_kdb(python::object o,python::object g,python::object l){
-		python::object lng = python::eval("long",g,l);
+		python::object lng = python::eval("numpy.float",g,l);
 		python::object o_ = lng(o.attr("astype")(lng));
 		// return kx::kf(kx::zu(python::extract<kx::J>(o_)));
-		return kx::kz(kx::zu(python::extract<kx::J>(o_)));
+		return kx::kz(kx::zu(python::extract<kx::F>(o_)));
 	}
 
 	kx::K datetime64_d_to_kdb(python::object o,python::object g,python::object l){
-		python::object lng = python::eval("int",g,l);
+		python::object lng = python::eval("numpy.int",g,l);
 		python::object o_ = lng(o.attr("astype")(lng));
 		return kx::kd(python::extract<kx::I>(o_) - 10957 );
 	}
 
 	kx::K datetime64_M_to_kdb(python::object o,python::object g,python::object l){
-		python::object lng = python::eval("int",g,l);
+		python::object lng = python::eval("numpy.int",g,l);
 		python::object o_ = lng(o.attr("astype")(lng));
 		return kx::ktj(-13,kx::mu(python::extract<kx::J>(o_)));
 	}
 
 	kx::K datetime64_ns_to_kdb(python::object o,python::object g,python::object l){
-		python::object lng = python::eval("long",g,l);
-		python::object o_ = lng(o.attr("astype")(lng));
-		// return kx::kf(kx::zu(python::extract<kx::J>(o_)));
-		return kx::ktj(-12,kx::pu(python::extract<kx::J>(o_)));
+		python::object lng = python::eval("int",g,l);
+		python::object o_ = lng(o);
+		return kx::ktj(-12, kx::pu(python::extract<kx::J>(o_)));
 	}
 
 	kx::K bool_to_kdb(python::object o,python::object g,python::object l){
@@ -144,7 +143,7 @@ namespace pytok {
 		std::size_t size = python::extract<std::size_t>(o.attr("size"));
 		kx::K r_ = kx::ktn(6,size);
 		std::size_t i = 0;
-		for(kx::IP r = kx::conv(r_);r.first!=r.second;++r.first,++i) *r.first = python::extract<kx::I>(o[i]);
+		for(kx::IP r = kx::conv(r_);r.first!=r.second;++r.first,++i) *r.first = python::extract<kx::I>(o[i].attr("item")());
 		return r_;
 	}
 
@@ -208,11 +207,14 @@ namespace pytok {
 	}
 
 	kx::K datetime64_ns_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		python::object lng = python::eval("long",g);
+		python::object lng = python::eval("int",g);
 		std::size_t size = python::extract<std::size_t>(o.attr("size"));
 		kx::K r_ = kx::ktn(12,size);
 		std::size_t i = 0;
-		for(kx::JP r = kx::conv(r_);r.first!=r.second;++r.first,++i)*r.first = kx::pu(python::extract<kx::J>(lng(o[i].attr("astype")(lng)))) ;
+		for (kx::JP r = kx::conv(r_); r.first != r.second; ++r.first, ++i) {
+			python::object o_ = lng(o[i]);
+			*r.first = kx::pu(python::extract<kx::J>(o_));
+		};
 		return r_;
 	}
 
@@ -360,6 +362,8 @@ namespace pytok {
 	kx::K python_to_k_map_func(python::object o_,python::object g = python::object(),python::object l= python::object()){
 		std::string n = python_name(o_);
 		python_to_k_funcs_::iterator i =  python_to_k_funcs.find(n);
+		if (i == python_to_k_funcs.end()) return kx::krr(kx::ss(n.c_str()));
+		// return kx::kb(1);
 		// if(i == python_to_k_funcs.end() )return object_map_put(o_);
 		return (i->second)(o_,g,l);
 	}
