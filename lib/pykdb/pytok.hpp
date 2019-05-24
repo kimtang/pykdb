@@ -180,11 +180,14 @@ namespace pytok {
 	}
 
 	kx::K datetime64_M_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		python::object integer = python::eval("int",g);
+		python::object lng = python::eval("numpy.long",g);
+		python::object integer = python::eval("int", g);
 		std::size_t size = python::extract<std::size_t>(o.attr("size"));
 		kx::K r_ = kx::ktn(13,size);
 		std::size_t i = 0;
-		for(kx::IP r = kx::conv(r_);r.first!=r.second;++r.first,++i)*r.first = kx::mu( python::extract<kx::I>(o[i].attr("astype")(integer))) ;
+		for(kx::IP r = kx::conv(r_);r.first!=r.second;++r.first,++i)*r.first = kx::mu( python::extract<kx::I>(
+			integer(o[i].attr("astype")(lng))
+			)) ;
 		return r_;
 	}
 
@@ -193,16 +196,21 @@ namespace pytok {
 		std::size_t size = python::extract<std::size_t>(o.attr("size"));
 		kx::K r_ = kx::ktn(14,size);
 		std::size_t i = 0;
-		for(kx::IP r = kx::conv(r_);r.first!=r.second;++r.first,++i)*r.first = kx::du( python::extract<kx::I>(o[i].attr("astype")(integer))) ;
+		for(kx::IP r = kx::conv(r_);r.first!=r.second;++r.first,++i)*r.first = kx::du( python::extract<kx::I>(
+			integer(o[i].attr("astype")(integer))
+			)) ;
 		return r_;
 	}
 
 	kx::K datetime64_us_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		python::object lng = python::eval("long",g);
+
+		python::object lng = python::eval("numpy.float", g, l);
+
 		std::size_t size = python::extract<std::size_t>(o.attr("size"));
 		kx::K r_ = kx::ktn(15,size);
 		std::size_t i = 0;
-		for(kx::FP r = kx::conv(r_);r.first!=r.second;++r.first,++i)*r.first = kx::zu( python::extract<kx::J>(lng(o[i].attr("astype")(lng)))) ;
+		for(kx::FP r = kx::conv(r_);r.first!=r.second;++r.first,++i)
+			*r.first = kx::zu( python::extract<kx::F>(o[i].attr("astype")(lng))) ;
 		return r_;
 	}
 
@@ -212,7 +220,7 @@ namespace pytok {
 		kx::K r_ = kx::ktn(12,size);
 		std::size_t i = 0;
 		for (kx::JP r = kx::conv(r_); r.first != r.second; ++r.first, ++i) {
-			python::object o_ = lng(o[i]);
+			python::object o_ = lng(o[i].attr("item")());
 			*r.first = kx::pu(python::extract<kx::J>(o_));
 		};
 		return r_;

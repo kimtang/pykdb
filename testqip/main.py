@@ -12,9 +12,7 @@ import qip
 
 hdl = qip.open_connection(8888)
 
-qip.execute(hdl,'{x}',ndata)
-
- atoms = qip.execute(hdl,'atoms')
+atoms = qip.execute(hdl,'atoms')
 
 t = atoms[['name','data']]
 
@@ -28,33 +26,10 @@ print(
 
 t = atoms[['name','ldata']]
 
+t['from_kdb'] = [ qip.execute(hdl,'{x}',row['ldata']) for _,row in t.iterrows() ]
 
-for _ , row in t.iterrows() :
-    print(qip.execute(hdl,'{x}',row['ldata']))
+t['isSame'] = t['ldata'] == t['from_kdb']
 
-
-ldata = row['ldata']
-
-ldata.item()
-
-
-
-data = t['ldata'].iloc[4]
-
-data.__class__.__name__
-
-data.dtype.name
-
-data.size
-
-data.item(2)
-
-t['ldata'].iloc[0]
-
-qip.execute(hdl,'{x}',t['ldata'].iloc[4])
-
-
-
-ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()
-
-t['isSame'] = t['data'] == t['from_kdb']
+print(
+    "Number of error: {}".format(len(t[~t['isSame']]))
+    )

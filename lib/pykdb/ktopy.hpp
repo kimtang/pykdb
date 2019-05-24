@@ -146,14 +146,15 @@ namespace ktopy {
 	};
 
 	python::object lboolean_to_python(kx::K k_,python::object g){
-		python::object ones = python::eval("numpy.ones",g)
-					  ,dtype = python::str("bool")
-					  ,size = python::object(k_->n);
-		python::object np = ones(size,dtype);
-		kx::G* g0 = k_->G0;
-		for(std::size_t i=0,end = k_->n;i<end;++i,++g0)np[i ]= static_cast<bool>(*g0);
+	 	python::object ones = python::eval("numpy.ones",g)
+	 				  ,dtype = python::str("bool")
+	 				  ,size = python::object(k_->n);
+	 	python::object np = ones(size,dtype);
+	 	kx::G* g0 = k_->G0;
+	 	for(std::size_t i=0,end = k_->n;i<end;++i,++g0)np[i ]= static_cast<bool>(*g0);
 		return np;
 	};
+
 	// TODO: Add implementation for guid
 	python::object lguid_to_python(kx::K k,python::object g){
 		python::list lst = python::list();
