@@ -71,6 +71,9 @@ BOOST_PYTHON_MODULE(qip)
 {
 	ktopy::k_to_p_map_init();
 	pytok::p_to_k_map_init();
+	python::import("numpy");
+	python::import("pandas");
+	python::import("uuid");
 	def("kim", kim, kim_overloads());
 	def("execute", execute, execute_overloads());
 	def("open_connection", open_connection, open_connection_overloads());

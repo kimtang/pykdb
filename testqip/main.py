@@ -14,6 +14,27 @@ hdl = qip.open_connection(8888)
 
 atoms = qip.execute(hdl,'atoms')
 
+tmp = 1,2
+
+abc = qip.execute(hdl,'{} 1')
+
+abc==None
+
+qip.execute(hdl,'{0N!x}',tmp)
+
+fatoms = qip.execute(hdl,'`ndata _ flip atoms')
+
+fatoms.keys()
+
+fatoms['ldata'][1:4]
+
+qip.execute(hdl,'{0N!x}',fatoms)
+
+qip.execute(hdl,'{0N!x}',fatoms['ldata'])
+
+
+1
+
 t = atoms[['name','data']]
 
 t['from_kdb'] = [ qip.execute(hdl,'{x}',row['data']) for _,row in t.iterrows() ]

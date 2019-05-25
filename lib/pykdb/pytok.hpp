@@ -61,6 +61,13 @@ namespace pytok {
 		return kx::kz(kx::zu(python::extract<kx::F>(o_)));
 	}
 
+	kx::K datetime64_ms_to_kdb(python::object o, python::object g, python::object l) {
+		python::object lng = python::eval("numpy.float", g, l);
+		python::object o_ = lng(o.attr("astype")(lng));
+		// return kx::kf(kx::zu(python::extract<kx::J>(o_)));
+		return kx::kz(kx::zu(python::extract<kx::F>(o_)));
+	}
+
 	kx::K datetime64_d_to_kdb(python::object o,python::object g,python::object l){
 		python::object lng = python::eval("numpy.int",g,l);
 		python::object o_ = lng(o.attr("astype")(lng));
@@ -92,6 +99,15 @@ namespace pytok {
 		return k_;
 	};
 
+	kx::K tuple_to_kdb(python::object o, python::object g, python::object l) {
+		python::tuple tpl = python::extract<python::tuple>(o);
+		std::size_t len = python::len(tpl);
+		kx::K k_ = kx::ktn(0, len);
+		kx::K* k = kx::conv(k_);
+		for (std::size_t i = 0; i != len; ++i) k[i] = python_to_k_map_func(tpl[i], g, l);
+		return k_;
+	};
+
 	kx::K bool_ndarray_to_kdb(python::object o_,python::object g,python::object l){
 		std::size_t size = python::extract<std::size_t>(o_.attr("size"));
 		python::object o = o_.attr("item");
@@ -118,7 +134,7 @@ namespace pytok {
 		std::string n = python::extract<std::string>(o.attr("dtype").attr("name"));
 		n.append("_ndarray");
 		python_to_k_funcs_::iterator i =  python_to_k_funcs.find(n);
-		if(i == python_to_k_funcs.end() ) return kx::krr(kx::ss(n.c_str())); // string is not shown, fix it
+		if(i == python_to_k_funcs.end() ) return kx::ks(n.append(" not implemented").c_str()); // string is not shown, fix it
 		return (i->second)(o,g,l);
 	}
 
@@ -132,10 +148,13 @@ namespace pytok {
 	}
 
 	kx::K int16_ndarray_to_kdb(python::object o,python::object g,python::object l){
+		python::object integer = python::eval("int");
 		std::size_t size = python::extract<std::size_t>(o.attr("size"));
 		kx::K r_ = kx::ktn(5,size);
 		std::size_t i = 0;
-		for(kx::HP r = kx::conv(r_);r.first!=r.second;++r.first,++i) *r.first = python::extract<kx::H>(o[i]);
+		for(kx::HP r = kx::conv(r_);r.first!=r.second;++r.first,++i) *r.first = python::extract<kx::H>(
+			integer(o[i].attr("astype")(integer))
+			);
 		return r_;
 	}
 
@@ -211,6 +230,18 @@ namespace pytok {
 		std::size_t i = 0;
 		for(kx::FP r = kx::conv(r_);r.first!=r.second;++r.first,++i)
 			*r.first = kx::zu( python::extract<kx::F>(o[i].attr("astype")(lng))) ;
+		return r_;
+	}
+
+	kx::K datetime64_ms_ndarray_to_kdb(python::object o, python::object g, python::object l) {
+
+		python::object lng = python::eval("numpy.float", g, l);
+
+		std::size_t size = python::extract<std::size_t>(o.attr("size"));
+		kx::K r_ = kx::ktn(15, size);
+		std::size_t i = 0;
+		for (kx::FP r = kx::conv(r_); r.first != r.second; ++r.first, ++i)
+			* r.first = kx::zu(python::extract<kx::F>(o[i].attr("astype")(lng)));
 		return r_;
 	}
 
@@ -329,26 +360,31 @@ namespace pytok {
 	  python_to_k_funcs["timedelta64"] = &numpy_to_kdb;
 	  python_to_k_funcs["datetime64"] = &numpy_to_kdb;
 
-	  python_to_k_funcs["datetime64[D]"] = &datetime64_d_to_kdb;
 	  python_to_k_funcs["timedelta64[ms]"] = &timedelta64_ms_to_kdb;
 	  python_to_k_funcs["timedelta64[s]"] = &timedelta64_s_to_kdb;
 	  python_to_k_funcs["timedelta64[m]"] = &timedelta64_m_to_kdb;
 	  python_to_k_funcs["timedelta64[ns]"] = &timedelta64_ns_to_kdb;
+
+	  python_to_k_funcs["datetime64[D]"] = &datetime64_d_to_kdb;
 	  python_to_k_funcs["datetime64[us]"] = &datetime64_us_to_kdb;
 	  python_to_k_funcs["datetime64[M]"] = &datetime64_M_to_kdb;
+	  python_to_k_funcs["datetime64[ms]"] = &datetime64_ms_to_kdb;
 	  python_to_k_funcs["datetime64[ns]"] = &datetime64_ns_to_kdb;
 
 	  python_to_k_funcs["ndarray"] = &ndarray_to_kdb;
 	  python_to_k_funcs["int8_ndarray"] = &int8_ndarray_to_kdb;
+	  python_to_k_funcs["int16_ndarray"] = &int16_ndarray_to_kdb;
 	  python_to_k_funcs["int32_ndarray"] = &int32_ndarray_to_kdb;
 	  python_to_k_funcs["int64_ndarray"] = &int64_ndarray_to_kdb;
 	  python_to_k_funcs["float32_ndarray"] = &float32_ndarray_to_kdb;
 	  python_to_k_funcs["float64_ndarray"] = &float64_ndarray_to_kdb;
 
+
 	  python_to_k_funcs["datetime64[ns]_ndarray"] = &datetime64_ns_ndarray_to_kdb;
 	  python_to_k_funcs["datetime64[M]_ndarray"] = &datetime64_M_ndarray_to_kdb;
 	  python_to_k_funcs["datetime64[D]_ndarray"] = &datetime64_D_ndarray_to_kdb;
 	  python_to_k_funcs["datetime64[us]_ndarray"] = &datetime64_us_ndarray_to_kdb;
+	  python_to_k_funcs["datetime64[ms]_ndarray"] = &datetime64_ms_ndarray_to_kdb;
 	  python_to_k_funcs["timedelta64[ns]_ndarray"] = &timedelta64_ns_ndarray_to_kdb;
 	  python_to_k_funcs["timedelta64[m]_ndarray"] = &timedelta64_m_ndarray_to_kdb;
 	  python_to_k_funcs["timedelta64[s]_ndarray"] = &timedelta64_s_ndarray_to_kdb;
@@ -362,6 +398,7 @@ namespace pytok {
 	  // python_to_k_funcs["lsymbol_enum_meta"] = &symbol_enum_meta_to_kdb;
 
 	  python_to_k_funcs["list"] = &list_to_kdb;
+	  python_to_k_funcs["tuple"] = &tuple_to_kdb;
 	  python_to_k_funcs["dict"] = &dict_to_kdb;
 	  python_to_k_funcs["DataFrame"] = &dataFrame_to_kdb;
 	  python_to_k_funcs["NoneType"] = &nonetype_to_kdb;
@@ -370,7 +407,7 @@ namespace pytok {
 	kx::K python_to_k_map_func(python::object o_,python::object g = python::object(),python::object l= python::object()){
 		std::string n = python_name(o_);
 		python_to_k_funcs_::iterator i =  python_to_k_funcs.find(n);
-		if (i == python_to_k_funcs.end()) return kx::krr(kx::ss(n.c_str()));
+		if (i == python_to_k_funcs.end()) return kx::ks(n.append(" not implemented").c_str());
 		// return kx::kb(1);
 		// if(i == python_to_k_funcs.end() )return object_map_put(o_);
 		return (i->second)(o_,g,l);

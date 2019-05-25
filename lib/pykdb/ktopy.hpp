@@ -4,6 +4,7 @@
 
 # include <kdb/kx.hpp>
 # include <boost/python.hpp>
+# include "boost/python/numpy.hpp"
 # include <boost/uuid/uuid.hpp>
 # include <boost/uuid/uuid_io.hpp>
 # include <cstdint>
@@ -397,7 +398,9 @@ namespace ktopy {
 	k_to_python_funcs_ k_to_python_funcs;
 
 	python::object k_to_python_map_func(kx::K o,python::object g = python::object()) {
-		return k_to_python_funcs[o->t](o, g);
+		k_to_python_funcs_::iterator  i = k_to_python_funcs.find(o->t);		
+		if (i == k_to_python_funcs.end()) return python::object();
+		return (i->second)(o, g);
 	}
 
 	python::str k_to_python_str(kx::K e_) {
