@@ -13,6 +13,7 @@
 # include <iostream>
 
 namespace python = boost::python;
+namespace np = boost::python::numpy;
 
 namespace ktopy {
 
@@ -178,61 +179,60 @@ namespace ktopy {
 
 
 	python::object lbyte_to_python(kx::K k_,python::object g){
-		python::object ones = python::eval("numpy.ones",g)
-					  ,dtype = python::str("int8")
-					  ,size = python::object(k_->n);
-		python::object np = ones(size,dtype);
+		np::dtype dt = np::dtype::get_builtin<kx::G>();
+
+		python::tuple shape = python::make_tuple(k_->n);
+		np::ndarray na = np::zeros(shape, dt);
+		kx::G* iter = reinterpret_cast<kx::G*>(na.get_data());
+
 		kx::G* g0 = k_->G0;
-		for(std::size_t i=0,end = k_->n;i<end;++i,++g0)np[i]= *g0;
-		return np;
+		for (kx::G* end = g0 + k_->n; g0 != end; ++g0,++iter) *iter = *g0;
+		return na;
+
 	};
 
 	python::object lshort_to_python(kx::K k_,python::object g){
-		python::object ones = python::eval("numpy.ones",g)
-					  ,dtype = python::str("int16")
-					  ,size = python::object(k_->n);
-		python::object np = ones(size,dtype);
-		std::size_t i = 0;
-		for(kx::HP k = kx::conv(k_);k.first!=k.second;++k.first,++i)np[i]=*k.first;
-		return np;
+		np::dtype dt = np::dtype::get_builtin<kx::H>();
+		python::tuple shape = python::make_tuple(k_->n);
+		np::ndarray na = np::zeros(shape, dt);
+		kx::H* iter = reinterpret_cast<kx::H*>(na.get_data());
+		for (kx::HP k = kx::conv(k_); k.first != k.second; ++iter, ++k.first) * iter = *k.first;
+		return na;
 	};
 
 	python::object lint_to_python(kx::K k_,python::object g){
-		python::object ones = python::eval("numpy.ones",g)
-					  ,dtype = python::eval("numpy.int32",g)
-					  ,size = python::object(k_->n);
-		python::object np = ones(size,dtype);
-		kx::IP k = kx::conv(k_);
-		for(std::size_t i = 0;k.first!=k.second;++i,++k.first)np[i] = *k.first;
-		return np;
+		np::dtype dt = np::dtype::get_builtin<kx::I>();
+		python::tuple shape = python::make_tuple(k_->n);
+		np::ndarray na = np::zeros(shape, dt);
+		kx::I* iter = reinterpret_cast<kx::I*>(na.get_data());
+		for (kx::IP k = kx::conv(k_); k.first != k.second; ++iter, ++k.first) * iter = *k.first;
+		return na;
 	};
 	python::object llong_to_python(kx::K k_,python::object g){
-		python::object ones = python::eval("numpy.ones",g)
-					  ,dtype = python::eval("numpy.int64",g)
-					  ,size = python::object(k_->n);
-		python::object np = ones(size,dtype);
-		kx::JP k = kx::conv(k_);
-		for(std::size_t i = 0;k.first!=k.second;++i,++k.first)np[i] = *k.first;
-		return np;
+		np::dtype dt = np::dtype::get_builtin<kx::J>();
+		python::tuple shape = python::make_tuple(k_->n);
+		np::ndarray na = np::zeros(shape, dt);
+		kx::J* iter = reinterpret_cast<kx::J*>(na.get_data());
+		for (kx::JP k = kx::conv(k_); k.first != k.second; ++iter, ++k.first) * iter = *k.first;
+		return na;
 		};
+
 	python::object lreal_to_python(kx::K k_,python::object g){
-		python::object ones = python::eval("numpy.ones",g)
-					  ,dtype = python::eval("numpy.float32",g)
-					  ,size = python::object(k_->n);
-		python::object np = ones(size,dtype);
-		kx::EP k = kx::conv(k_);
-		for(std::size_t i = 0;k.first!=k.second;++i,++k.first)np[i] = *k.first;
-		return np;
+		np::dtype dt = np::dtype::get_builtin<kx::E>();
+		python::tuple shape = python::make_tuple(k_->n);
+		np::ndarray na = np::zeros(shape, dt);
+		kx::E* iter = reinterpret_cast<kx::E*>(na.get_data());
+		for (kx::EP k = kx::conv(k_); k.first != k.second; ++iter, ++k.first) * iter = *k.first;
+		return na;
 	};
 
 	python::object lfloat_to_python(kx::K k_,python::object g){
-		python::object ones = python::eval("numpy.ones",g)
-					  ,dtype = python::eval("numpy.float64",g)
-					  ,size = python::object(k_->n);
-		python::object np = ones(size,dtype);
-		kx::FP k = kx::conv(k_);
-		for(std::size_t i = 0;k.first!=k.second;++i,++k.first)np[i] = *k.first;
-		return np;
+		np::dtype dt = np::dtype::get_builtin<kx::F>();
+		python::tuple shape = python::make_tuple(k_->n);
+		np::ndarray na = np::zeros(shape, dt);
+		kx::F* iter = reinterpret_cast<kx::F*>(na.get_data());
+		for(kx::FP k = kx::conv(k_);k.first!=k.second;++iter,++k.first) *iter = *k.first;
+		return na;
 	};
 
 	python::object lchar_to_python(kx::K k_,python::object g){
@@ -252,84 +252,85 @@ namespace ktopy {
 	};
 
 	python::object ltimestamp_to_python(kx::K k_,python::object g){
-		python::object ones = python::eval("numpy.ones",g)
-					  ,dtype = python::str("datetime64[ns]")
-					  ,size = python::object(k_->n);
-		python::object np = ones(size,dtype);
-		kx::JP k = kx::conv(k_);
-		for(std::size_t i = 0;k.first!=k.second;++i,++k.first)np[i] = kx::up(*k.first);
-		return np;
+
+		np::dtype dt = np::dtype::get_builtin<kx::J>();
+		python::tuple shape = python::make_tuple(k_->n);
+		np::ndarray na = np::zeros(shape, dt);
+		kx::J* iter = reinterpret_cast<kx::J*>(na.get_data());
+		for (kx::JP k = kx::conv(k_); k.first != k.second; ++iter, ++k.first) * iter = kx::up(*k.first);
+		return na.attr("astype")("datetime64[ns]");
 	};
 
 	python::object lmonth_to_python(kx::K k_,python::object g){
-		python::object ones = python::eval("numpy.ones",g)
-					  ,dtype = python::str("datetime64[M]")
-					  ,size = python::object(k_->n);
-		python::object np = ones(size,dtype);
-		kx::IP k = kx::conv(k_);
-		for(std::size_t i = 0;k.first!=k.second;++i,++k.first)np[i] = kx::um(*k.first);
-		return np;
+
+		np::dtype dt = np::dtype::get_builtin<kx::I>();
+		python::tuple shape = python::make_tuple(k_->n);
+		np::ndarray na = np::zeros(shape, dt);
+		kx::I* iter = reinterpret_cast<kx::I*>(na.get_data());
+		for (kx::IP k = kx::conv(k_); k.first != k.second; ++iter, ++k.first) * iter = kx::um(*k.first);
+
+		return na.attr("astype")("datetime64[M]");
 	};
 	python::object ldate_to_python(kx::K k_,python::object g){
-		python::object datetime64 = python::eval("numpy.ones",g)
-					  ,dtype("datetime64[D]")
-					  ,size(k_->n);
-		// 10957+k->i
-		python::object np = datetime64(size,dtype);
-		kx::IP k = kx::conv(k_);
-		for(std::size_t i = 0;k.first!=k.second;++i,++k.first)np[i] = kx::ud(*k.first);
-		return np;
+
+		np::dtype dt = np::dtype::get_builtin<kx::I>();
+		python::tuple shape = python::make_tuple(k_->n);
+		np::ndarray na = np::zeros(shape, dt);
+		kx::I* iter = reinterpret_cast<kx::I*>(na.get_data());
+		for (kx::IP k = kx::conv(k_); k.first != k.second; ++iter, ++k.first) * iter = kx::ud(*k.first);
+
+		return na.attr("astype")("datetime64[D]");
 	};
 
 	python::object ldatetime_to_python(kx::K k_,python::object g){
-		python::object datetime64 = python::eval("numpy.ones",g)
-					  ,dtype("datetime64[us]")
-					  ,size(k_->n);
-		// 10957+k->i
-		python::object np = datetime64(size,dtype);
-		kx::FP k = kx::conv(k_);
-		for(std::size_t i = 0;k.first!=k.second;++i,++k.first)np[i] = kx::uz(*k.first);
-		return np;
+
+		np::dtype dt = np::dtype::get_builtin<kx::F>();
+		python::tuple shape = python::make_tuple(k_->n);
+		np::ndarray na = np::zeros(shape, dt);
+		kx::F* iter = reinterpret_cast<kx::F*>(na.get_data());
+		for (kx::FP k = kx::conv(k_); k.first != k.second; ++iter, ++k.first) * iter = kx::uz(*k.first);
+
+		return na.attr("astype")("datetime64[ms]");
+
 	};
 	python::object ltimespan_to_python(kx::K k_,python::object g){
-		python::object timedelta64 = python::eval("numpy.ones",g)
-					  ,dtype("timedelta64[ns]")
-					  ,size(k_->n);
-		// 10957+k->i
-		python::object np = timedelta64(size,dtype);
-		kx::JP k = kx::conv(k_);
-		for(std::size_t i = 0;k.first!=k.second;++i,++k.first)np[i] = *k.first;
-		return np;
+
+		np::dtype dt = np::dtype::get_builtin<kx::J>();
+		python::tuple shape = python::make_tuple(k_->n);
+		np::ndarray na = np::zeros(shape, dt);
+		kx::J* iter = reinterpret_cast<kx::J*>(na.get_data());
+		for (kx::JP k = kx::conv(k_); k.first != k.second; ++iter, ++k.first) * iter = *k.first;
+		return na.attr("astype")("timedelta64[ns]");
 	};
 	python::object lminute_to_python(kx::K k_,python::object g){
-		python::object timedelta64 = python::eval("numpy.ones",g)
-					  ,dtype("timedelta64[m]")
-					  ,size(k_->n);
-		// 10957+k->i
-		python::object np = timedelta64(size,dtype);
-		kx::IP k = kx::conv(k_);
-		for(std::size_t i = 0;k.first!=k.second;++i,++k.first)np[i] = *k.first;
-		return np;
+
+		np::dtype dt = np::dtype::get_builtin<kx::I>();
+		python::tuple shape = python::make_tuple(k_->n);
+		np::ndarray na = np::zeros(shape, dt);
+		kx::I* iter = reinterpret_cast<kx::I*>(na.get_data());
+		for (kx::IP k = kx::conv(k_); k.first != k.second; ++iter, ++k.first) * iter = *k.first;
+		return na.attr("astype")("timedelta64[m]");
+
 	};
 	python::object lsecond_to_python(kx::K k_,python::object g){
-		python::object timedelta64 = python::eval("numpy.ones",g)
-					  ,dtype("timedelta64[s]")
-					  ,size(k_->n);
-		// 10957+k->i
-		python::object np = timedelta64(size,dtype);
-		kx::IP k = kx::conv(k_);
-		for(std::size_t i = 0;k.first!=k.second;++i,++k.first)np[i] = *k.first;
-		return np;
+
+		np::dtype dt = np::dtype::get_builtin<kx::I>();
+		python::tuple shape = python::make_tuple(k_->n);
+		np::ndarray na = np::zeros(shape, dt);
+		kx::I* iter = reinterpret_cast<kx::I*>(na.get_data());
+		for (kx::IP k = kx::conv(k_); k.first != k.second; ++iter, ++k.first) * iter = *k.first;
+		return na.attr("astype")("timedelta64[s]");
+
 	};
 	python::object ltime_to_python(kx::K k_,python::object g){
-		python::object timedelta64 = python::eval("numpy.ones",g)
-					  ,dtype("timedelta64[ms]")
-					  ,size(k_->n);
-		// 10957+k->i
-		python::object np = timedelta64(size,dtype);
-		kx::IP k = kx::conv(k_);
-		for(std::size_t i = 0;k.first!=k.second;++i,++k.first)np[i] = *k.first;
-		return np;
+
+		np::dtype dt = np::dtype::get_builtin<kx::I>();
+		python::tuple shape = python::make_tuple(k_->n);
+		np::ndarray na = np::zeros(shape, dt);
+		kx::I* iter = reinterpret_cast<kx::I*>(na.get_data());
+		for (kx::IP k = kx::conv(k_); k.first != k.second; ++iter, ++k.first) * iter = *k.first;
+		return na.attr("astype")("timedelta64[ms]");
+
 	};
 
 	python::object dict_to_python(kx::K k,python::object g){

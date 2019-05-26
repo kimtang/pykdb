@@ -14,26 +14,8 @@ hdl = qip.open_connection(8888)
 
 atoms = qip.execute(hdl,'atoms')
 
-tmp = 1,2
+fatoms = qip.execute(hdl,'flip atoms')
 
-abc = qip.execute(hdl,'{} 1')
-
-abc==None
-
-qip.execute(hdl,'{0N!x}',tmp)
-
-fatoms = qip.execute(hdl,'`ndata _ flip atoms')
-
-fatoms.keys()
-
-fatoms['ldata'][1:4]
-
-qip.execute(hdl,'{0N!x}',fatoms)
-
-qip.execute(hdl,'{0N!x}',fatoms['ldata'])
-
-
-1
 
 t = atoms[['name','data']]
 
@@ -47,10 +29,8 @@ print(
 
 t = atoms[['name','ldata']]
 
+t
+
 t['from_kdb'] = [ qip.execute(hdl,'{x}',row['ldata']) for _,row in t.iterrows() ]
 
-t['isSame'] = t['ldata'] == t['from_kdb']
-
-print(
-    "Number of error: {}".format(len(t[~t['isSame']]))
-    )
+t

@@ -341,3 +341,6 @@ healthchecksdb
 
 # testqip/qip.pyd
 testqip/qip.pyd
+
+# testqip/qip.pyd
+testqip/dontcare.py

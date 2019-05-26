@@ -44,18 +44,6 @@ python::object execute(kx::I i, kx::SS s, python::object k1 = python::object(), 
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(execute_overloads, execute, 2, 7)
 
-bool kim(kx::I i, python::object k1 = python::object(), python::object k2 = python::object(), python::object k3 = python::object(), python::object k4 = python::object(), python::object k5 = python::object())
-{
-	if (i == 1) return isNone(k1);
-	if (i == 2) return isNone(k2);
-	if (i == 3) return isNone(k3);
-	if (i == 4) return isNone(k4);
-	if (i == 5) return isNone(k5);
-	return isNone(k5);
-}
-
-BOOST_PYTHON_FUNCTION_OVERLOADS(kim_overloads, kim, 1, 6)
-
 kx::I open_connection(kx::I p, const kx::SS h = 0, const kx::SS u = 0, kx::I n = 0) {
 	std::string host("");
 	if (h == 0) return kx::khp(host.c_str(), p);
@@ -71,10 +59,7 @@ BOOST_PYTHON_MODULE(qip)
 {
 	ktopy::k_to_p_map_init();
 	pytok::p_to_k_map_init();
-	python::import("numpy");
-	python::import("pandas");
-	python::import("uuid");
-	def("kim", kim, kim_overloads());
+	boost::python::numpy::initialize();
 	def("execute", execute, execute_overloads());
 	def("open_connection", open_connection, open_connection_overloads());
 	def("close", kx::kclose);

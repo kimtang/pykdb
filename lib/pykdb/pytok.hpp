@@ -6,12 +6,14 @@
 # include <boost/uuid/uuid.hpp>
 # include <boost/uuid/string_generator.hpp>
 # include <boost/python.hpp>
+# include "boost/python/numpy.hpp"
 # include <cstdint>
 # include <map>
 # include <string>
 # include <iostream>
 
 namespace python = boost::python;
+namespace np = boost::python::numpy;
 
 namespace pytok {
 
@@ -139,148 +141,158 @@ namespace pytok {
 	}
 
 	kx::K int8_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		std::size_t size = python::extract<std::size_t>(o.attr("size"));
-		kx::K r_ = kx::ktn(4,size);
-		std::size_t i = 0;
-		python::object oo = o.attr("item");
-		for(kx::GP r = kx::conv(r_);r.first!=r.second;++r.first,++i) *r.first = (kx::I) python::extract<kx::I>(oo(i));
+
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
+		kx::K r_ = kx::ktn(4, size);
+		kx::G* iter = reinterpret_cast<kx::G*>(na.get_data());
+		for (kx::GP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = *iter;
 		return r_;
 	}
 
 	kx::K int16_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		python::object integer = python::eval("int");
-		std::size_t size = python::extract<std::size_t>(o.attr("size"));
-		kx::K r_ = kx::ktn(5,size);
-		std::size_t i = 0;
-		for(kx::HP r = kx::conv(r_);r.first!=r.second;++r.first,++i) *r.first = python::extract<kx::H>(
-			integer(o[i].attr("astype")(integer))
-			);
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
+		kx::K r_ = kx::ktn(5, size);
+		kx::H* iter = reinterpret_cast<kx::H*>(na.get_data());
+		for (kx::HP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = *iter;
 		return r_;
 	}
 
 	kx::K int32_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		std::size_t size = python::extract<std::size_t>(o.attr("size"));
-		kx::K r_ = kx::ktn(6,size);
-		std::size_t i = 0;
-		for(kx::IP r = kx::conv(r_);r.first!=r.second;++r.first,++i) *r.first = python::extract<kx::I>(o[i].attr("item")());
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
+		kx::K r_ = kx::ktn(6, size);
+		kx::I* iter = reinterpret_cast<kx::I*>(na.get_data());
+		for (kx::IP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = *iter;
 		return r_;
 	}
 
 	kx::K int64_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		std::size_t size = python::extract<std::size_t>(o.attr("size"));
-		kx::K r_ = kx::ktn(7,size);
-		std::size_t i = 0;
-		for(kx::JP r = kx::conv(r_);r.first!=r.second;++r.first,++i)*r.first = python::extract<kx::J>(o[i].attr("item")());
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
+		kx::K r_ = kx::ktn(7, size);
+		kx::J* iter = reinterpret_cast<kx::J*>(na.get_data());
+		for (kx::JP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = *iter;
 		return r_;
 	}
 
 	kx::K float32_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		std::size_t size = python::extract<std::size_t>(o.attr("size"));
-		kx::K r_ = kx::ktn(8,size);
-		std::size_t i = 0;
-		for(kx::EP r = kx::conv(r_);r.first!=r.second;++r.first,++i)*r.first = python::extract<kx::E>(o[i].attr("item")());
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
+		kx::E* iter = reinterpret_cast<kx::E*>(na.get_data());
+		kx::K r_ = kx::ktn(8, size);
+		for (kx::EP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = *iter;
 		return r_;
 	}
 
 	kx::K float64_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		std::size_t size = python::extract<std::size_t>(o.attr("size"));
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
+		kx::F* iter = reinterpret_cast<kx::F*>(na.get_data());
 		kx::K r_ = kx::ktn(9,size);
-		std::size_t i = 0;
-		for(kx::FP r = kx::conv(r_);r.first!=r.second;++r.first,++i)*r.first = python::extract<kx::F>(o[i].attr("item")());
+		for (kx::FP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = *iter;
 		return r_;
 	}
 
-	kx::K timedelta64_ns_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		std::size_t size = python::extract<std::size_t>(o.attr("size"));
-		kx::K r_ = kx::ktn(16,size);
-		std::size_t i = 0;
-		for(kx::JP r = kx::conv(r_);r.first!=r.second;++r.first,++i)*r.first = python::extract<kx::J>(o[i].attr("item")());
+	kx::K timedelta64_ns_ndarray_to_kdb(python::object o_,python::object g,python::object l){
+		python::object int64 = python::eval("numpy.int64", g);
+		python::object o = o_.attr("astype")(int64);
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
+		kx::K r_ = kx::ktn(16, size);
+		kx::J* iter = reinterpret_cast<kx::J*>(na.get_data());
+		for (kx::JP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = *iter;
 		return r_;
 	}
 
-	kx::K datetime64_M_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		python::object lng = python::eval("numpy.long",g);
-		python::object integer = python::eval("int", g);
-		std::size_t size = python::extract<std::size_t>(o.attr("size"));
-		kx::K r_ = kx::ktn(13,size);
-		std::size_t i = 0;
-		for(kx::IP r = kx::conv(r_);r.first!=r.second;++r.first,++i)*r.first = kx::mu( python::extract<kx::I>(
-			integer(o[i].attr("astype")(lng))
-			)) ;
+	kx::K datetime64_M_ndarray_to_kdb(python::object o_ ,python::object g,python::object l){
+
+		python::object o = o_.attr("astype")("int");
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
+		kx::K r_ = kx::ktn(13, size);
+		kx::I* iter = reinterpret_cast<kx::I*>(na.get_data());
+		for (kx::IP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = kx::mu(*iter);
 		return r_;
 	}
 
-	kx::K datetime64_D_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		python::object integer = python::eval("int",g);
-		std::size_t size = python::extract<std::size_t>(o.attr("size"));
-		kx::K r_ = kx::ktn(14,size);
-		std::size_t i = 0;
-		for(kx::IP r = kx::conv(r_);r.first!=r.second;++r.first,++i)*r.first = kx::du( python::extract<kx::I>(
-			integer(o[i].attr("astype")(integer))
-			)) ;
+	kx::K datetime64_D_ndarray_to_kdb(python::object o_,python::object g,python::object l){
+		python::object o = o_.attr("astype")("int");
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
+		kx::K r_ = kx::ktn(14, size);
+		kx::I* iter = reinterpret_cast<kx::I*>(na.get_data());
+		for (kx::IP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = kx::du(*iter);
 		return r_;
 	}
 
-	kx::K datetime64_us_ndarray_to_kdb(python::object o,python::object g,python::object l){
+	kx::K datetime64_us_ndarray_to_kdb(python::object o_,python::object g,python::object l){
 
-		python::object lng = python::eval("numpy.float", g, l);
-
-		std::size_t size = python::extract<std::size_t>(o.attr("size"));
-		kx::K r_ = kx::ktn(15,size);
-		std::size_t i = 0;
-		for(kx::FP r = kx::conv(r_);r.first!=r.second;++r.first,++i)
-			*r.first = kx::zu( python::extract<kx::F>(o[i].attr("astype")(lng))) ;
-		return r_;
-	}
-
-	kx::K datetime64_ms_ndarray_to_kdb(python::object o, python::object g, python::object l) {
-
-		python::object lng = python::eval("numpy.float", g, l);
-
-		std::size_t size = python::extract<std::size_t>(o.attr("size"));
+		python::object o = o_.attr("astype")("float");
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
 		kx::K r_ = kx::ktn(15, size);
-		std::size_t i = 0;
-		for (kx::FP r = kx::conv(r_); r.first != r.second; ++r.first, ++i)
-			* r.first = kx::zu(python::extract<kx::F>(o[i].attr("astype")(lng)));
+		kx::F* iter = reinterpret_cast<kx::F*>(na.get_data());
+		for (kx::FP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = kx::zu(*iter / 1000);
+		return r_;
+
+	}
+
+	kx::K datetime64_ms_ndarray_to_kdb(python::object o_, python::object g, python::object l) {
+
+		python::object o = o_.attr("astype")("float");
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
+		kx::K r_ = kx::ktn(15, size);
+		kx::F* iter = reinterpret_cast<kx::F*>(na.get_data());
+		for (kx::FP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = kx::zu(*iter );
+		return r_;
+
+	}
+
+	kx::K datetime64_ns_ndarray_to_kdb(python::object o_,python::object g,python::object l){
+		python::object int64 = python::eval("numpy.int64", g);
+		python::object o = o_.attr("astype")(int64);
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
+		kx::K r_ = kx::ktn(12, size);
+		kx::J* iter = reinterpret_cast<kx::J*>(na.get_data());
+		for (kx::JP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = kx::pu(*iter);
 		return r_;
 	}
 
-	kx::K datetime64_ns_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		python::object lng = python::eval("int",g);
-		std::size_t size = python::extract<std::size_t>(o.attr("size"));
-		kx::K r_ = kx::ktn(12,size);
-		std::size_t i = 0;
-		for (kx::JP r = kx::conv(r_); r.first != r.second; ++r.first, ++i) {
-			python::object o_ = lng(o[i].attr("item")());
-			*r.first = kx::pu(python::extract<kx::J>(o_));
-		};
+	kx::K timedelta64_ms_ndarray_to_kdb(python::object o_,python::object g,python::object l){
+
+		python::object o = o_.attr("astype")("int");
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
+		kx::K r_ = kx::ktn(19, size);
+		kx::I* iter = reinterpret_cast<kx::I*>(na.get_data());
+		for (kx::IP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = *iter;
 		return r_;
 	}
 
-	kx::K timedelta64_ms_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		python::object lng = python::eval("int",g);
-		std::size_t size = python::extract<std::size_t>(o.attr("size"));
-		kx::K r_ = kx::ktn(19,size);
-		std::size_t i = 0;
-		for(kx::IP r = kx::conv(r_);r.first!=r.second;++r.first,++i)*r.first = python::extract<kx::I>(lng(o[i].attr("astype")(lng)));
+	kx::K timedelta64_m_ndarray_to_kdb(python::object o_,python::object g,python::object l){
+
+		python::object o = o_.attr("astype")("int");
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
+		kx::K r_ = kx::ktn(17, size);
+		kx::I* iter = reinterpret_cast<kx::I*>(na.get_data());
+		for (kx::IP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = *iter;
 		return r_;
+
 	}
 
-	kx::K timedelta64_m_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		python::object integ = python::eval("int",g);
-		std::size_t size = python::extract<std::size_t>(o.attr("size"));
-		kx::K r_ = kx::ktn(17,size);
-		std::size_t i = 0;
-		for(kx::IP r = kx::conv(r_);r.first!=r.second;++r.first,++i)*r.first = python::extract<kx::I>(integ(o[i].attr("astype")(integ))) ;
-		return r_;
-	}
+	kx::K timedelta64_s_ndarray_to_kdb(python::object o_,python::object g,python::object l){
 
-	kx::K timedelta64_s_ndarray_to_kdb(python::object o,python::object g,python::object l){
-		python::object integ = python::eval("int",g);
-		std::size_t size = python::extract<std::size_t>(o.attr("size"));
-		kx::K r_ = kx::ktn(18,size);
-		std::size_t i = 0;
-		for(kx::IP r = kx::conv(r_);r.first!=r.second;++r.first,++i)*r.first = python::extract<kx::I>(integ(o[i].attr("astype")(integ))) ;
+		python::object o = o_.attr("astype")("int");
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
+		kx::K r_ = kx::ktn(18, size);
+		kx::I* iter = reinterpret_cast<kx::I*>(na.get_data());
+		for (kx::IP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = *iter;
 		return r_;
 	}
 
@@ -372,6 +384,7 @@ namespace pytok {
 	  python_to_k_funcs["datetime64[ns]"] = &datetime64_ns_to_kdb;
 
 	  python_to_k_funcs["ndarray"] = &ndarray_to_kdb;
+	  python_to_k_funcs["uint8_ndarray"] = &int8_ndarray_to_kdb;
 	  python_to_k_funcs["int8_ndarray"] = &int8_ndarray_to_kdb;
 	  python_to_k_funcs["int16_ndarray"] = &int16_ndarray_to_kdb;
 	  python_to_k_funcs["int32_ndarray"] = &int32_ndarray_to_kdb;
