@@ -148,13 +148,14 @@ namespace ktopy {
 	};
 
 	python::object lboolean_to_python(kx::K k_,python::object g){
-	 	python::object ones = python::eval("numpy.ones",g)
-	 				  ,dtype = python::str("bool")
-	 				  ,size = python::object(k_->n);
-	 	python::object np = ones(size,dtype);
-	 	kx::G* g0 = k_->G0;
-	 	for(std::size_t i=0,end = k_->n;i<end;++i,++g0)np[i ]= static_cast<bool>(*g0);
-		return np;
+
+		np::dtype dt = np::dtype::get_builtin<bool>();
+		python::tuple shape = python::make_tuple(k_->n);
+		np::ndarray na = np::zeros(shape, dt);
+		bool* iter = reinterpret_cast<bool*>(na.get_data());
+		kx::G* g0 = k_->G0;
+		for (std::size_t i = 0, end = k_->n; i < end; ++i, ++iter, ++g0) *iter = static_cast<bool>(*g0);
+		return na;
 	};
 
 	// TODO: Add implementation for guid
@@ -290,7 +291,7 @@ namespace ktopy {
 		kx::F* iter = reinterpret_cast<kx::F*>(na.get_data());
 		for (kx::FP k = kx::conv(k_); k.first != k.second; ++iter, ++k.first) * iter = kx::uz(*k.first);
 
-		return na.attr("astype")("datetime64[ms]");
+		return na.attr("astype")("datetime64[us]");
 
 	};
 	python::object ltimespan_to_python(kx::K k_,python::object g){

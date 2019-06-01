@@ -67,7 +67,7 @@ namespace pytok {
 		python::object lng = python::eval("numpy.float", g, l);
 		python::object o_ = lng(o.attr("astype")(lng));
 		// return kx::kf(kx::zu(python::extract<kx::J>(o_)));
-		return kx::kz(kx::zu(python::extract<kx::F>(o_)));
+		return kx::kz(kx::zu(python::extract<kx::F>(o_) * 1000));
 	}
 
 	kx::K datetime64_d_to_kdb(python::object o,python::object g,python::object l){
@@ -110,14 +110,15 @@ namespace pytok {
 		return k_;
 	};
 
-	kx::K bool_ndarray_to_kdb(python::object o_,python::object g,python::object l){
-		std::size_t size = python::extract<std::size_t>(o_.attr("size"));
-		python::object o = o_.attr("item");
-		kx::K r_ = kx::ktn(1,size);
-		std::size_t i = 0;
-		kx::G* r = r_->G0;
-		for(std::size_t i = 0;i!=size;++r,++i) (*r) = (bool)python::extract<bool>(o(i));
+	kx::K bool_ndarray_to_kdb(python::object o,python::object g,python::object l){
+
+		std::size_t size = python::len(o);
+		np::ndarray na = np::from_object(o);
+		kx::K r_ = kx::ktn(1, size);
+		bool* iter = reinterpret_cast<bool*>(na.get_data());
+		for (kx::GP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = *iter;
 		return r_;
+
 	}
 
 	kx::K int_to_kdb(python::object o,python::object g,python::object l){return kx::ki(python::extract<int>(o));};
@@ -234,7 +235,7 @@ namespace pytok {
 		np::ndarray na = np::from_object(o);
 		kx::K r_ = kx::ktn(15, size);
 		kx::F* iter = reinterpret_cast<kx::F*>(na.get_data());
-		for (kx::FP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = kx::zu(*iter / 1000);
+		for (kx::FP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = kx::zu(*iter );
 		return r_;
 
 	}
@@ -246,7 +247,7 @@ namespace pytok {
 		np::ndarray na = np::from_object(o);
 		kx::K r_ = kx::ktn(15, size);
 		kx::F* iter = reinterpret_cast<kx::F*>(na.get_data());
-		for (kx::FP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = kx::zu(*iter );
+		for (kx::FP r = kx::conv(r_); r.first != r.second; ++r.first, ++iter) * r.first = kx::zu(*iter * 1000 );
 		return r_;
 
 	}
