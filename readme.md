@@ -6,11 +6,11 @@ PyKDB provides two modules to call kdb+ from python and vice-versa designed for 
 
 qip (q in python)
 --------
-
+![qip in action](https://bitbucket.org/kuentang/pykdb/src/master/gif/piq.gif)
 
 piq (python in q)
 --------
-
+![piq in action](https://bitbucket.org/kuentang/pykdb/src/master/gif/piq.gif)
 
 Features
 --------
