@@ -28,10 +28,3 @@ sym:`abc`acb`cab`bca
 (::)atoms:update data:(.z.p;`month$.z.p;`date$.z.p;`datetime$.z.p;`timespan$.z.p;`minute$.z.p;`second$.z.p;`time$.z.p;`sym?`abc) from atoms where t in 12 13 14 15 16 17 18 19 20
 
 (::)atoms:update ldata:3#/:data from atoms
-
-
-/ 
-
--4 + count string first 1?0ng
-
-type 1?0ng
