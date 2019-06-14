@@ -344,3 +344,7 @@ testqip/qip.pyd
 
 # testqip/qip.pyd
 testqip/dontcare.py
+
+pip/packaging_qip/build
+pip/packaging_qip/dist
+pip/packaging_qip/qip2.egg-info
