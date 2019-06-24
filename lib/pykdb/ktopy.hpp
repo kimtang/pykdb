@@ -108,7 +108,10 @@ namespace ktopy {
 	};
 	// we will pass it as string. There is no way to distinguish between string and symbols
 	python::object symbol_to_python(kx::K k,python::object g){
-		std::string sstr(k->s); return python::str(sstr);};
+		python::object str_ = python::eval("numpy.str_", g);
+		std::string sstr(k->s);
+		return str_(sstr);
+	};
 
 	python::object char_to_python(kx::K k,python::object g){
 		kx::C c = k->g; return python::object(c);
@@ -249,7 +252,7 @@ namespace ktopy {
 			python::str str(str_);
 			lst.append(str);
 		}
-		return lst;
+		return np::array(lst);
 	};
 
 	python::object ltimestamp_to_python(kx::K k_,python::object g){

@@ -49,22 +49,30 @@ def measure3(dtype0):
     isSame = abs((result  -  tmp).astype(int)) < 1000
     print('Time elapsed for {} : {} : {} '.format(str(tmp.dtype.name), time_elapsed, isSame.any()))
 
+def measure4():
+    tmp =  [str(num) for num in numpy.linspace(1., 100., int(1e1), dtype=numpy.float)]
+    tmp = numpy.array(tmp)
+    start_time = datetime.now()
+    result = qip.execute(hdl,'{0N!x}',tmp)
+    time_elapsed = datetime.now() - start_time
+    isSame = result  == tmp
+    print('Time elapsed for {} : {} : {} '.format("str_", time_elapsed, isSame.any()))    
+
 measure3("s")
 measure3("m")
 measure3("ms")
 measure3("ns")
-
 measure2("D")
 measure2("M")
 measure2("us")
 measure2("ms")
 measure2("ns")
-
 measure(numpy.float64)
 measure(numpy.float32)
-
 measure1(numpy.int64)
 measure1(numpy.int32)
 measure1(numpy.int16)
 measure1(numpy.int8)
 measure1(numpy.bool)
+
+measure4()

@@ -5,8 +5,10 @@
 # include <kdb/kx.hpp>
 # include <boost/uuid/uuid.hpp>
 # include <boost/uuid/string_generator.hpp>
+# include <boost/lexical_cast.hpp>
 # include <boost/python.hpp>
-# include "boost/python/numpy.hpp"
+# include <boost/python/numpy.hpp>
+# include <boost/algorithm/string.hpp>
 # include <cstdint>
 # include <map>
 # include <string>
@@ -133,11 +135,27 @@ namespace pytok {
 		return r_;
 	};
 
+	kx::K str__to_kdb(python::object o, python::object g, python::object l) {
+		// std::size_t size = python::extract<std::size_t>(o.attr("__len__")());
+		char const* c_str = python::extract<char const*>(o);
+		kx::K r_ = kx::ks(c_str);
+		// for (kx::CP r = kx::conv(r_); r.first != r.second; ++r.first, ++c_str)* r.first = *c_str;
+		return r_;
+	};
+
 	kx::K ndarray_to_kdb(python::object o,python::object g,python::object l){
 		std::string n = python::extract<std::string>(o.attr("dtype").attr("name"));
-		n.append("_ndarray");
-		python_to_k_funcs_::iterator i =  python_to_k_funcs.find(n);
-		if(i == python_to_k_funcs.end() ) return kx::ks(n.append(" not implemented").c_str()); // string is not shown, fix it
+		std::string m;
+		if (boost::contains(n, "str")) {
+			m = std::string("str_ndarray");
+		}
+		else {
+			n.append("_ndarray");
+			m = n;
+		}
+		
+		python_to_k_funcs_::iterator i =  python_to_k_funcs.find(m);
+		if(i == python_to_k_funcs.end() ) return kx::ks(m.append(" not implemented").c_str()); // string is not shown, fix it
 		return (i->second)(o,g,l);
 	}
 
@@ -306,6 +324,18 @@ namespace pytok {
 	}
 
 
+	kx::K str96_ndarray_to_kdb(python::object o, python::object g, python::object l) {
+		np::ndarray arr = np::from_object(o);
+		// kx::K r_ = kx::ks(arr.get_data());
+		std::size_t size = python::extract<std::size_t>(o.attr("size"));
+		kx::K r_ = kx::ktn(0, size);
+		std::size_t i = 0;
+		for (kx::KP r = kx::conv(r_); r.first != r.second; ++r.first, ++i)* r.first = str__to_kdb(arr[i], g, l);
+		return r_;
+	}
+
+
+
 
 	kx::K numpy_to_kdb(python::object o,python::object g,python::object l){
 		std::string n = python::extract<std::string>(o.attr("dtype").attr("name"));
@@ -367,6 +397,7 @@ namespace pytok {
 	  python_to_k_funcs["float"] = &float_to_kdb;
 	  python_to_k_funcs["long"] = &long_to_kdb;
 	  python_to_k_funcs["str"] = &str_to_kdb;
+	  python_to_k_funcs["str_"] = &str__to_kdb;
 
 	  python_to_k_funcs["UUID"] = &uuid_to_kdb;
 
@@ -403,6 +434,9 @@ namespace pytok {
 	  python_to_k_funcs["timedelta64[m]_ndarray"] = &timedelta64_m_ndarray_to_kdb;
 	  python_to_k_funcs["timedelta64[s]_ndarray"] = &timedelta64_s_ndarray_to_kdb;
 	  python_to_k_funcs["timedelta64[ms]_ndarray"] = &timedelta64_ms_ndarray_to_kdb;
+
+	  python_to_k_funcs["str_ndarray"] = &str96_ndarray_to_kdb;
+
 	  python_to_k_funcs["object_ndarray"] = &object_ndarray_to_kdb;
 
 	  python_to_k_funcs["bool_ndarray"] = &bool_ndarray_to_kdb;

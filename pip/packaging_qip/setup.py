@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="qip2",
-    version="1.0.0.2",
+    version="1.1.0.0",
     author="Kim Kuen Tang",
     author_email="kimktang@gmail.com",
     description="Integrate kdb+ into python",
